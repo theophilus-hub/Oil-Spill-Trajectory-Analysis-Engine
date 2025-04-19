@@ -1,0 +1,40 @@
+{
+  "status": "success",
+  "timestamp": "2025-04-19T15:20:49.369603",
+  "source": "static_data",
+  "data": {
+    "medium_crude": {
+      "name": "Medium Crude Oil",
+      "api_gravity": 25.0,
+      "viscosity": 50.0,
+      "density": 0.9,
+      "pour_point": -10,
+      "flash_point": 30,
+      "evaporation_rate": 0.35,
+      "solubility": 0.02,
+      "surface_tension": 30.0
+    },
+    "light_crude": {
+      "name": "Light Crude Oil",
+      "api_gravity": 35.0,
+      "viscosity": 10.0,
+      "density": 0.85,
+      "pour_point": -20,
+      "flash_point": 20,
+      "evaporation_rate": 0.5,
+      "solubility": 0.03,
+      "surface_tension": 25.0
+    },
+    "heavy_crude": {
+      "name": "Heavy Crude Oil",
+      "api_gravity": 15.0,
+      "viscosity": 500.0,
+      "density": 0.95,
+      "pour_point": 5,
+      "flash_point": 40,
+      "evaporation_rate": 0.15,
+      "solubility": 0.01,
+      "surface_tension": 35.0
+    }
+  }
+}

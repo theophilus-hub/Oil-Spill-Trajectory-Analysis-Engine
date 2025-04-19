@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "generatedAt": "2025-04-19T12:35:20.631Z",
+    "tasksAnalyzed": 10,
+    "thresholdScore": 5,
+    "projectName": "Your Project Name",
+    "usedResearch": false
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Set up project structure and environment",
+      "complexityScore": 3,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Break down the project structure setup task into 4 logical subtasks covering file creation, dependency management, documentation, and verification steps. Include specific deliverables for each subtask.",
+      "reasoning": "This is a relatively straightforward setup task with clear deliverables. The complexity is low as it involves creating empty files, setting up dependencies, and basic documentation. No complex logic or algorithms required."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Implement data models and interfaces",
+      "complexityScore": 5,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide the data models implementation task into 5 subtasks, focusing on each core model (SpillConfig, EnvironmentalData, Particle, SimulationResults) separately, plus a subtask for interface definitions and validation utilities. Include validation requirements and type specifications for each.",
+      "reasoning": "This task requires careful design of data structures with proper validation and interfaces. Medium complexity due to the need for type hints, validation logic, and ensuring the models will work together coherently across modules."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Develop basic data acquisition module",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down the data acquisition module development into 6 subtasks, with one for each external API integration (OpenWeatherMap, NOAA data services, USGS, NOAA ADIOS), one for the unified interface implementation, and one for caching and fallback mechanisms. Include error handling requirements for each API.",
+      "reasoning": "High complexity due to integration with multiple external APIs, each with different formats and requirements. Includes error handling, retry logic, caching mechanisms, and fallback strategies, all of which add significant complexity."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "Implement basic preprocessing pipeline",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide the preprocessing pipeline implementation into 5 subtasks: DEM processing and resampling, slope calculation functions, wind/current data interpolation, particle initialization for Lagrangian modeling, and a final integration subtask for the complete pipeline. Include performance considerations for each step.",
+      "reasoning": "Moderate to high complexity due to various data processing techniques required (resampling, interpolation, normalization). Requires understanding of geospatial data processing and preparation for simulation models."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Develop water-based Lagrangian particle model",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down the water-based Lagrangian particle model into 6 subtasks: core particle tracking algorithm, movement calculation based on environmental factors, diffusion implementation, evaporation/decay modeling, time-stepping engine development, and boundary handling. Include performance optimization requirements for each component.",
+      "reasoning": "High complexity due to the physics-based modeling required. Involves implementing algorithms for particle tracking, diffusion, environmental interactions, and time evolution. Computational efficiency is critical, adding to the complexity."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Implement land-based flow model",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Divide the land-based flow model implementation into 6 subtasks: downhill flow algorithm, cost-distance model development, terrain factor integration, time-stepping implementation, land-water transition handling, and performance optimization. Include testing criteria for each algorithm component.",
+      "reasoning": "High complexity due to the specialized algorithms needed for land-based flow modeling. Requires understanding of terrain analysis, cost-distance algorithms, and handling transitions between different models. Performance optimization with large datasets adds complexity."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Develop export functionality",
+      "complexityScore": 4,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Break down the export functionality development into 4 subtasks: JSON export implementation, GeoJSON export for spatial data, CSV export for statistics, and a metadata/organization system. Include data structure specifications and validation requirements for each format.",
+      "reasoning": "Moderate complexity as it involves implementing multiple export formats, but the task is well-defined with clear deliverables. The main challenge is ensuring consistent formatting and proper metadata inclusion across different export types."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Implement main orchestration module",
+      "complexityScore": 5,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide the main orchestration module implementation into 5 subtasks: core simulation runner class, command-line interface development, progress reporting system, configuration file support, and error handling/logging implementation. Include integration requirements with other modules for each component.",
+      "reasoning": "Medium complexity as it requires integrating all previous components into a cohesive workflow. Involves command-line interface design, progress reporting, configuration management, and comprehensive error handling."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Develop Flask API server",
+      "complexityScore": 5,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the Flask API server development into 5 subtasks: basic Flask application setup, simulation endpoint implementation, status checking functionality, file serving endpoints, and API documentation/validation. Include security considerations and error handling for each endpoint.",
+      "reasoning": "Medium complexity as it involves creating a REST API with multiple endpoints, request validation, and response formatting. The integration with the simulation engine adds some complexity, but the Flask framework simplifies much of the implementation."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Create integration examples and documentation",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide the documentation and examples task into 5 subtasks: frontend integration examples, API documentation development, user guide creation, Jupyter notebook demonstrations, and sample dataset preparation. Include audience considerations and coverage requirements for each documentation component.",
+      "reasoning": "Moderate to high complexity due to the comprehensive nature of the documentation required. Involves creating integration examples, API documentation, user guides, and interactive demonstrations. Requires deep understanding of all system components and their interactions."
+    }
+  ]
+}

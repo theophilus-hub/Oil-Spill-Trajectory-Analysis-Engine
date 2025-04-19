@@ -1,0 +1,1 @@
+{"success": true, "data": {"density": 900, "viscosity": 50, "surface_tension": 28, "evaporation_rate": 0.25, "emulsification_constant": 0.7, "solubility": 0.01}, "error": null, "source": "oil_properties_mock", "timestamp": "2025-04-19T15:20:54.748249", "cached": false}

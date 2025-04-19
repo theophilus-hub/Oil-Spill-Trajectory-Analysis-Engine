@@ -1,0 +1,187 @@
+**Product Requirements Document (PRD): Oil Spill Trajectory Analysis Module**
+
+---
+
+### Project Title:
+**Oil Spill Trajectory Analysis Engine**
+
+### Context:
+This module will be integrated as a core feature in a larger desktop application built with Rust and TypeScript. The module will be responsible for simulating oil spill trajectories on both land and water surfaces using scientific models and real environmental data. The backend processing will be implemented in Python, with an optional Flask server for local or remote integration via API.
+
+---
+
+## 1. Objective:
+Build a self-contained, modular Python system for oil spill trajectory simulation that:
+- Acquires real-world environmental and terrain data
+- Preprocesses and structures this data for modeling
+- Simulates spill movement over time (land & water)
+- Outputs result data as JSON or GeoJSON for use in Rust/TS app
+- Optionally exposes functionality via Flask REST API
+
+---
+
+## 2. Key Features:
+
+### A. Data Acquisition:
+- Fetch wind and weather data (OpenWeatherMap, NOAA)
+- Fetch ocean current data (CMEMS, HYCOM)
+- Download elevation/DEM data (USGS, Copernicus)
+- Load oil properties (NOAA ADIOS or static dataset)
+
+### B. Preprocessing:
+- DEM resampling and slope calculation
+- Wind/current data interpolation to spill location
+- Initialization of particle positions (for Lagrangian model)
+
+### C. Modeling Engine:
+- Water-based Lagrangian particle model
+- Land-based downhill slope or cost-distance flow
+- Diffusion, evaporation, and decay factors
+- Time-stepped simulation with configurable parameters
+
+### D. Export Module:
+- Export to GeoJSON (for mapping)
+- Export to JSON (raw structured results)
+- Option for CSV export (summary/statistics)
+
+### E. Optional Flask API:
+- POST /simulate -> triggers analysis with input payload
+- GET /status/:id -> returns result or progress
+- Output files served as downloads or inline JSON
+
+---
+
+## 3. Tech Stack:
+
+| Component | Technology |
+|----------|-------------|
+| Modeling Core | Python (NumPy, SciPy, Rasterio, xarray, shapely, richdem) |
+| Data Sources | NOAA, CMEMS, USGS, OpenWeatherMap APIs |
+| Optional Server | Flask (Python REST API) |
+| Frontend Integration | Express.js (TypeScript) + MapLibre/Leaflet |
+| Output Format | JSON, GeoJSON, CSV |
+
+---
+
+## 4. Modules & Structure
+```
+trajectory_core/
+├── __init__.py
+├── config.py
+├── fetch_data.py
+├── preprocess.py
+├── model.py
+├── export.py
+├── main.py
+└── server.py (Flask API - optional)
+```
+
+---
+
+## 5. Data Flow:
+```
+User Input (Location, Volume, Oil Type)
+        ⇓
+[fetch_data.py] => Download weather, DEM, current data
+        ⇓
+[preprocess.py] => Interpolate, normalize, compute slope
+        ⇓
+[model.py] => Simulate trajectory using particles or slope flow
+        ⇓
+[export.py] => Output to GeoJSON / JSON
+        ⇓
+[main.py or Flask API] => Serve or visualize result
+```
+
+---
+
+## 6. Deliverables:
+- [ ] Fully modular Python codebase
+- [ ] CLI to run simulations offline
+- [ ] Optional Flask server with `/simulate` endpoint
+- [ ] Sample GeoJSON outputs for test cases
+- [ ] Integration-ready documentation for calling from Rust/TS frontend
+- [ ] Step-by-step usage guide for each module
+- [ ] Sample input/output JSON formats
+- [ ] Unit tests and validation for each major function
+- [ ] DEM and weather data sample datasets for development
+
+---
+
+## 7. Milestones:
+
+| Milestone | Task | Est. Time |
+|----------|------|------------|
+| M1 | Set up project structure, fetch dummy data | 2 days |
+| M2 | Implement DEM slope & interpolation | 3 days |
+| M3 | Build Lagrangian water model | 4 days |
+| M4 | Implement land flow model | 3 days |
+| M5 | Export and format results | 2 days |
+| M6 | Add Flask API | 2 days |
+| M7 | Integration test & CLI examples | 2 days |
+
+---
+
+## 8. Future Enhancements (Post-MVP):
+- GUI for visual parameter tweaking
+- Parallel processing of long simulations
+- Real-time input (streaming weather data)
+- Containerization (Docker) for deployment
+- Map UI preview in desktop app
+
+---
+
+## 9. Step-by-Step Task Breakdown
+
+### Phase 1: Project Initialization
+- [ ] Initialize Python virtual environment and install dependencies
+- [ ] Create folder/module structure with empty script files
+- [ ] Set up version control and initial README
+
+### Phase 2: Data Acquisition
+- [ ] Implement OpenWeatherMap API client for wind data
+- [ ] Implement CMEMS/HYCOM client to fetch ocean currents (NetCDF)
+- [ ] Fetch and store DEM data (raster, elevation GeoTIFF)
+- [ ] Load and format oil type properties (from CSV or JSON)
+
+### Phase 3: Data Preprocessing
+- [ ] Write raster reading logic for DEMs
+- [ ] Implement slope and aspect calculation using richdem or NumPy
+- [ ] Interpolate wind and current values to coordinates
+- [ ] Normalize and clean all input datasets for modeling
+
+### Phase 4: Trajectory Modeling
+- [ ] Design particle structure (position, velocity, decay)
+- [ ] Implement Lagrangian model loop for water-based spill
+- [ ] Build slope descent model for land-based spill
+- [ ] Include diffusion, advection, and environmental resistance
+- [ ] Configure simulation parameters: duration, timestep, particles
+
+### Phase 5: Result Exporting
+- [ ] Convert particle paths to GeoJSON format
+- [ ] Generate raw data output in JSON
+- [ ] Add statistical summary (affected area, direction, etc.)
+- [ ] Create CSV summary report (spread, peak impact, center of mass)
+
+### Phase 6: Flask API (Optional)
+- [ ] Set up Flask project and route handlers
+- [ ] Connect input JSON to core model functions
+- [ ] Serve output files via endpoints or inline responses
+- [ ] Add error handling and CORS support
+
+### Phase 7: Integration & Testing
+- [ ] Create CLI test commands to simulate spills
+- [ ] Document data input/output structure
+- [ ] Test JSON/GeoJSON parsing from Rust or TS frontend
+- [ ] Validate results with test map interface (MapLibre/Leaflet)
+
+### Phase 8: Optimization & Documentation
+- [ ] Refactor modules for performance (NumPy vectorization, etc.)
+- [ ] Write full usage documentation and API reference
+- [ ] Create integration mock with main desktop app
+- [ ] Add unit tests and CI pipeline for future validation
+
+---
+
+**Author:** You (SKAGE.dev)  
+**Created:** April 18, 2025

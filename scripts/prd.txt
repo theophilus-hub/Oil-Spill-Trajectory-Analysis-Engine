@@ -1,0 +1,239 @@
+<context>
+# Overview  
+The Oil Spill Trajectory Analysis Engine is a modular Python system designed to simulate oil spill trajectories on both land and water surfaces. This module will be integrated as a core feature in a larger desktop application built with Rust and TypeScript. It leverages scientific models and real environmental data to provide accurate predictions of oil spill movement over time.
+
+The system acquires environmental data (wind, weather, ocean currents, elevation), preprocesses this data for modeling, simulates spill movement, and outputs results in standard formats (JSON, GeoJSON) for visualization and analysis in the main application. An optional Flask server provides API access to the core functionality.
+
+# Core Features  
+## Data Acquisition
+- Fetches wind and weather data from OpenWeatherMap and NOAA
+- Retrieves ocean current data from CMEMS and HYCOM
+- Downloads elevation/DEM data from USGS and Copernicus
+- Loads oil properties from NOAA ADIOS or static dataset
+- Provides a unified interface for accessing all environmental data needed for simulation
+
+## Preprocessing
+- Performs DEM resampling and slope calculation
+- Handles wind/current data interpolation to spill location
+- Initializes particle positions for Lagrangian modeling
+- Normalizes and prepares all data for input to the modeling engine
+
+## Modeling Engine
+- Implements water-based Lagrangian particle model for ocean/lake spills
+- Provides land-based downhill slope or cost-distance flow modeling
+- Accounts for diffusion, evaporation, and decay factors
+- Runs time-stepped simulation with configurable parameters
+- Delivers accurate predictions based on scientific principles
+
+## Export Module
+- Exports results to GeoJSON for mapping visualization
+- Provides JSON output for raw structured results
+- Offers CSV export for summary statistics
+- Ensures compatibility with the Rust/TypeScript frontend
+
+## Optional Flask API
+- Exposes functionality via REST endpoints
+- Provides POST /simulate endpoint to trigger analysis
+- Offers GET /status/:id endpoint to check progress
+- Serves output files as downloads or inline JSON
+- Facilitates integration with other systems
+
+# User Experience  
+## User Personas
+- Environmental Scientists: Need accurate models for research and response planning
+- Emergency Response Teams: Require quick simulations to guide containment efforts
+- Application Developers: Integrating the module into the larger desktop application
+- Data Analysts: Working with the output to generate insights and reports
+
+## Key User Flows
+- Input spill parameters (location, volume, oil type)
+- Select environmental data sources or provide custom data
+- Configure simulation parameters (duration, timestep, etc.)
+- Run simulation and monitor progress
+- View and analyze results in the main application
+- Export findings for reports or further analysis
+
+## UI/UX Considerations
+- Clear parameter input forms with sensible defaults
+- Progress indicators for long-running simulations
+- Intuitive visualization of results in the main application
+- Consistent error handling and user feedback
+- Simple API structure for programmatic access
+</context>
+<PRD>
+# Technical Architecture  
+## System Components
+- **trajectory_core**: Main Python package containing all modules
+- **fetch_data.py**: Handles API calls to environmental data sources
+- **preprocess.py**: Prepares and normalizes input data
+- **model.py**: Implements simulation algorithms
+- **export.py**: Formats and outputs results
+- **main.py**: Provides main entry point and orchestration
+- **server.py**: Optional Flask API implementation
+
+## Data Models
+- **Spill Configuration**: Parameters defining the spill scenario
+  - Location (lat/long)
+  - Volume
+  - Oil type
+  - Simulation duration
+  - Timestep size
+- **Environmental Data**:
+  - Wind vectors (direction, speed)
+  - Ocean current vectors
+  - Elevation/DEM rasters
+  - Oil properties (density, viscosity, etc.)
+- **Particle Model**:
+  - Position
+  - Velocity
+  - Mass
+  - Decay factors
+- **Simulation Results**:
+  - Particle positions over time
+  - Concentration maps
+  - Affected area boundaries
+  - Statistical summaries
+
+## APIs and Integrations
+- **External Data APIs**:
+  - OpenWeatherMap API
+  - NOAA data services
+  - CMEMS/HYCOM ocean data
+  - USGS/Copernicus elevation data
+- **Internal API**:
+  - Python module interfaces
+  - Function signatures for core components
+- **Optional REST API**:
+  - Flask endpoints for remote access
+  - JSON request/response format
+  - Authentication (for future implementation)
+
+## Infrastructure Requirements
+- Python 3.8+ environment
+- Scientific Python libraries (NumPy, SciPy, Rasterio, xarray, shapely, richdem)
+- Storage for cached environmental data
+- Memory for large raster operations
+- Optional web server for Flask API
+
+# Development Roadmap  
+## Phase 1: Foundation (MVP)
+- Project structure setup with all module placeholders
+- Basic data acquisition from at least one source per data type
+- Simple preprocessing pipeline for environmental data
+- Prototype Lagrangian water model with basic physics
+- JSON export functionality
+- Command-line interface for running simulations
+
+## Phase 2: Core Functionality
+- Complete implementation of all data source integrations
+- Enhanced preprocessing with interpolation and normalization
+- Full Lagrangian water model with diffusion and decay
+- Land-based flow model implementation
+- GeoJSON and CSV export options
+- Basic validation against test cases
+
+## Phase 3: Integration & Optimization
+- Performance optimization of simulation algorithms
+- Caching strategy for environmental data
+- Flask API implementation
+- Integration examples with Rust/TypeScript frontend
+- Comprehensive error handling and edge cases
+- Documentation and usage examples
+
+## Phase 4: Advanced Features
+- Enhanced physical models (weathering, shoreline interaction)
+- Statistical analysis of simulation results
+- Batch processing capabilities
+- Visualization helpers for common scenarios
+- Additional data source options
+
+# Logical Dependency Chain
+## Foundation Layer
+1. Project structure and environment setup
+2. Basic data models and interfaces
+3. Simple data acquisition from one source (e.g., static test data)
+4. Basic preprocessing for test data
+5. Prototype water model with simplified physics
+
+## Core Functionality Layer
+6. Enhanced data acquisition from all sources
+7. Complete preprocessing pipeline
+8. Full water-based Lagrangian model
+9. Land-based flow model
+10. Basic export functionality (JSON)
+
+## Integration Layer
+11. Enhanced export options (GeoJSON, CSV)
+12. Command-line interface refinement
+13. Flask API implementation
+14. Integration examples with frontend
+15. Documentation and testing
+
+## Advanced Features Layer
+16. Performance optimization
+17. Enhanced physical models
+18. Statistical analysis tools
+19. Visualization helpers
+20. Additional data sources and formats
+
+# Risks and Mitigations  
+## Technical Challenges
+- **Risk**: Complex fluid dynamics modeling may be computationally intensive
+  - **Mitigation**: Use simplified models for MVP, optimize critical paths, implement progressive refinement
+- **Risk**: Inconsistent or missing environmental data
+  - **Mitigation**: Build fallback mechanisms, interpolation strategies, and data validation
+- **Risk**: Integration complexity with Rust/TypeScript frontend
+  - **Mitigation**: Define clear API contracts early, create integration examples, use standard formats
+
+## MVP Scope Management
+- **Risk**: Feature creep expanding the MVP beyond feasibility
+  - **Mitigation**: Strictly prioritize features, focus on core simulation first, defer advanced features
+- **Risk**: Overemphasis on accuracy vs. usability
+  - **Mitigation**: Balance scientific rigor with practical utility, validate with real users
+- **Risk**: Dependency on external APIs for critical functionality
+  - **Mitigation**: Create mock data for development, cache responses, build fallbacks
+
+## Resource Constraints
+- **Risk**: Performance limitations for large simulations
+  - **Mitigation**: Implement sampling strategies, progressive refinement, optimize critical algorithms
+- **Risk**: Development time constraints
+  - **Mitigation**: Modular approach allowing parallel work, clear prioritization of features
+- **Risk**: Expertise gaps in specific scientific domains
+  - **Mitigation**: Research existing implementations, consult domain experts, start with simplified models
+
+# Appendix  
+## Research References
+- Lagrangian particle tracking methods for oil spill modeling
+- Digital Elevation Model processing techniques
+- Oil weathering and environmental interaction models
+- NOAA's GNOME (General NOAA Operational Modeling Environment)
+- OpenDrift open source framework
+
+## Technical Specifications
+- **Supported Oil Types**: Crude oil, diesel, gasoline, bunker fuel
+- **Simulation Duration**: Up to 30 days
+- **Spatial Resolution**: Configurable from 10m to 1km
+- **Temporal Resolution**: Configurable from 15 minutes to 24 hours
+- **Output Formats**: GeoJSON, JSON, CSV
+- **API Protocol**: REST with JSON payloads
+- **Data Storage**: Local file-based for MVP, database for future
+
+## Sample Data Structure
+```json
+{
+  "input": {
+    "location": {"lat": 37.7749, "lng": -122.4194},
+    "oil_type": "medium_crude",
+    "volume_liters": 10000,
+    "duration_hours": 48,
+    "timestep_minutes": 30
+  },
+  "output": {
+    "trajectories": [...],
+    "affected_area_km2": 12.5,
+    "evaporation_percent": 35,
+    "shore_impact_probability": 0.75
+  }
+}
+```
+</PRD>
