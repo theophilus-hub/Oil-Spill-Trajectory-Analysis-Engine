@@ -21,8 +21,8 @@ The system:
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/username/oil-spill-trajectory.git
-cd oil-spill-trajectory
+git clone https://github.com/theophilus-hub/Oil-Spill-Trajectory-Analysis-Engine.git
+cd Oil-Spill-Trajectory-Analysis-Engine
 
 # Create a virtual environment
 python -m venv venv
