@@ -1,0 +1,18 @@
+{
+    "# Simulation parameters": "# This is a comment, not a parameter",
+    "duration_hours": 48,
+    "timestep_minutes": 30,
+    "particle_count": 1000,
+    
+    "# Environmental parameters": "# This is a comment, not a parameter",
+    "wind_speed_factor": 1.0,
+    "current_speed_factor": 1.0,
+    "diffusion_coefficient": 0.5,
+    "evaporation_rate": 0.02,
+    
+    "# Advanced parameters": "# This is a comment, not a parameter",
+    "random_seed": 42,
+    "shoreline_interaction": "sticky",
+    "weathering_enabled": true,
+    "cleanup_efficiency": 0.0
+}

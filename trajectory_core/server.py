@@ -2,9 +2,10 @@
 Flask API server for the Oil Spill Trajectory Analysis Engine.
 
 This module provides a REST API for the simulation:
-- POST /simulate -> triggers analysis with input payload
-- GET /status/:id -> returns result or progress
-- Output files served as downloads or inline JSON
+- POST /api/v1/simulate -> triggers analysis with input payload
+- GET /api/v1/status/:id -> returns result or progress
+- GET /api/v1/results/:id -> returns full simulation results
+- GET /api/v1/download/:id/:format -> downloads result files
 """
 
 import os
@@ -13,119 +14,116 @@ import json
 import logging
 import threading
 from datetime import datetime
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 
-from flask import Flask, request, jsonify, send_file, abort
-from flask_cors import CORS
+# Import necessary modules
+try:
+    from flask import Flask, request, jsonify, send_file, Response
+    from flask_cors import CORS
+    from werkzeug.exceptions import HTTPException
+except ImportError:
+    print("Flask and related packages not found. Please install them with:")
+    print("pip install flask flask-cors werkzeug")
+    raise
 
-from . import config
-from . import main
+# Import project modules
+from trajectory_core import config, main, export
 
 # Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('trajectory_api.log')
-    ]
-)
-
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create Flask app
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Dictionary to store simulation status and results
 simulations = {}
 
-
 def run_simulation_task(simulation_id: str, params: Dict[str, Any]) -> None:
-    """
-    Run a simulation in a background thread.
-    
-    Args:
-        simulation_id: Unique ID for the simulation
-        params: Simulation parameters
-    """
+    """Run a simulation in a background thread."""
     try:
-        # Update simulation status
+        # Mark simulation as running
         simulations[simulation_id]['status'] = 'running'
         
-        # Extract parameters
-        spill_location = (
-            params.get('latitude', 0),
-            params.get('longitude', 0)
-        )
-        spill_volume = params.get('volume', 1000)
-        oil_type = params.get('oil_type', 'medium_crude')
-        model_type = params.get('model_type', 'hybrid')
-        
-        # Extract simulation parameters
-        simulation_params = {
-            'duration_hours': params.get('duration_hours', 48),
-            'timestep_minutes': params.get('timestep_minutes', 30),
-            'particle_count': params.get('particle_count', 1000)
-        }
-        
         # Create simulation manager
-        manager = main.SimulationManager(simulation_params)
+        manager = main.SimulationManager(params)
+        
+        # Set progress callback
+        def progress_callback(progress: float, stage: Optional[str] = None):
+            """Update simulation progress in the simulations dictionary."""
+            simulations[simulation_id]['progress'] = progress
+            if stage:
+                simulations[simulation_id]['current_stage'] = stage
+            logger.debug(f"Simulation {simulation_id} progress: {progress:.1f}% ({stage})")
+        
+        manager.set_progress_callback(progress_callback)
         
         # Run simulation
-        results = manager.run_simulation(
-            spill_location=spill_location,
-            spill_volume=spill_volume,
-            oil_type=oil_type,
-            model_type=model_type
-        )
-        
-        # Update simulation status and results
-        simulations[simulation_id]['status'] = 'completed'
-        simulations[simulation_id]['results'] = results
-        simulations[simulation_id]['completed_at'] = datetime.now().isoformat()
-        
+        logger.info(f"Starting simulation {simulation_id}")
+        try:
+            results = manager.run_simulation(
+                spill_location=(params['latitude'], params['longitude']),
+                spill_volume=params['volume'],
+                oil_type=params['oil_type'],
+                model_type=params.get('model_type', 'hybrid'),
+                duration_hours=params.get('duration_hours', 72),
+                timestep_minutes=params.get('timestep_minutes', 15),
+                output_formats=['geojson'],  # Only generate GeoJSON for simplicity
+                output_directory=params.get('output_directory', config.OUTPUT_CONFIG['output_directory'])
+            )
+            
+            # Store results
+            simulations[simulation_id]['status'] = 'completed'
+            simulations[simulation_id]['progress'] = 100.0
+            simulations[simulation_id]['results'] = results
+            simulations[simulation_id]['completed_at'] = datetime.now().isoformat()
+            
+            logger.info(f"Simulation {simulation_id} completed successfully")
+        except Exception as inner_e:
+            # Handle simulation-specific errors
+            simulations[simulation_id]['status'] = 'error'
+            simulations[simulation_id]['error'] = str(inner_e)
+            logger.error(f"Simulation {simulation_id} failed: {inner_e}")
+            logger.exception(inner_e)
+    
     except Exception as e:
-        # Update simulation status with error
+        # Handle thread-level errors
         simulations[simulation_id]['status'] = 'error'
         simulations[simulation_id]['error'] = str(e)
-        logger.error(f"Error in simulation {simulation_id}: {e}")
+        logger.error(f"Thread error for simulation {simulation_id}: {e}")
+        logger.exception(e)
 
 
-@app.route('/simulate', methods=['POST'])
+@app.route('/api/v1/simulate', methods=['POST'])
 def start_simulation():
-    """Start a new simulation with the provided parameters."""
+    """Start a new simulation."""
     try:
         # Parse request data
         data = request.json
         
-        if not data:
-            return jsonify({
-                'error': 'No data provided'
-            }), 400
-        
         # Validate required parameters
-        required_params = ['latitude', 'longitude', 'volume']
+        required_params = ['latitude', 'longitude', 'volume', 'oil_type']
         for param in required_params:
             if param not in data:
                 return jsonify({
                     'error': f'Missing required parameter: {param}'
                 }), 400
         
-        # Generate unique ID for this simulation
+        # Generate simulation ID
         simulation_id = str(uuid.uuid4())
         
-        # Store simulation info
+        # Store simulation in memory
         simulations[simulation_id] = {
             'id': simulation_id,
-            'status': 'queued',
             'params': data,
+            'status': 'queued',
+            'progress': 0.0,
             'created_at': datetime.now().isoformat(),
-            'results': None,
-            'error': None
+            'results': None
         }
         
-        # Start simulation in background thread
+        # Start simulation in a background thread
         thread = threading.Thread(
             target=run_simulation_task,
             args=(simulation_id, data)
@@ -137,7 +135,7 @@ def start_simulation():
         return jsonify({
             'id': simulation_id,
             'status': 'queued',
-            'message': 'Simulation queued successfully'
+            'created_at': simulations[simulation_id]['created_at']
         })
         
     except Exception as e:
@@ -147,135 +145,107 @@ def start_simulation():
         }), 500
 
 
-@app.route('/status/<simulation_id>', methods=['GET'])
-def get_simulation_status(simulation_id):
-    """Get the status of a simulation."""
+@app.route('/api/v1/simulation/<simulation_id>', methods=['GET'])
+def get_simulation(simulation_id):
+    """Get simulation results or status."""
+    # Check if simulation exists
     if simulation_id not in simulations:
         return jsonify({
             'error': 'Simulation not found'
         }), 404
     
-    # Get simulation info
+    # Get simulation data
     simulation = simulations[simulation_id]
     
-    # Return status and basic info
-    response = {
-        'id': simulation_id,
-        'status': simulation['status'],
-        'created_at': simulation['created_at']
-    }
+    # Check if simulation is completed
+    if simulation['status'] == 'completed':
+        # Return GeoJSON results directly
+        if simulation['results'] and 'output_files' in simulation['results'] and 'geojson' in simulation['results']['output_files']:
+            geojson_file = simulation['results']['output_files']['geojson']
+            try:
+                with open(geojson_file, 'r') as f:
+                    geojson_data = json.load(f)
+                return jsonify(geojson_data)
+            except Exception as e:
+                logger.error(f"Error reading GeoJSON file: {e}")
+                return jsonify({
+                    'error': f'Error reading GeoJSON file: {e}',
+                    'status': 'error'
+                }), 500
+        else:
+            return jsonify({
+                'error': 'No GeoJSON results available',
+                'status': 'error'
+            }), 500
     
-    # Add completion time if available
-    if 'completed_at' in simulation:
-        response['completed_at'] = simulation['completed_at']
-    
-    # Add error if available
-    if simulation['error']:
-        response['error'] = simulation['error']
-    
-    # Add result summary if completed
-    if simulation['status'] == 'completed' and simulation['results']:
-        # Include output file paths
-        response['output_files'] = {
-            format_type: os.path.basename(filepath)
-            for format_type, filepath in simulation['results']['output_files'].items()
-        }
-        
-        # Add download URLs
-        base_url = request.url_root.rstrip('/')
-        response['download_urls'] = {
-            format_type: f"{base_url}/download/{simulation_id}/{format_type}"
-            for format_type in simulation['results']['output_files'].keys()
-        }
-    
-    return jsonify(response)
-
-
-@app.route('/results/<simulation_id>', methods=['GET'])
-def get_simulation_results(simulation_id):
-    """Get the full results of a completed simulation."""
-    if simulation_id not in simulations:
+    # If simulation has error, return error message
+    elif simulation['status'] == 'error':
         return jsonify({
-            'error': 'Simulation not found'
-        }), 404
-    
-    simulation = simulations[simulation_id]
-    
-    if simulation['status'] != 'completed':
-        return jsonify({
-            'error': 'Simulation not completed',
-            'status': simulation['status']
-        }), 400
-    
-    if not simulation['results']:
-        return jsonify({
-            'error': 'No results available'
+            'error': simulation.get('error', 'Unknown error'),
+            'status': 'error'
         }), 500
     
-    # Return the full results
-    return jsonify(simulation['results'])
+    # Otherwise, return status
+    else:
+        return jsonify({
+            'id': simulation_id,
+            'status': simulation['status'],
+            'progress': simulation.get('progress', 0.0),
+            'current_stage': simulation.get('current_stage', ''),
+            'created_at': simulation['created_at']
+        })
 
 
-@app.route('/download/<simulation_id>/<format_type>', methods=['GET'])
-def download_result_file(simulation_id, format_type):
-    """Download a result file."""
-    if simulation_id not in simulations:
-        return jsonify({
-            'error': 'Simulation not found'
-        }), 404
-    
-    simulation = simulations[simulation_id]
-    
-    if simulation['status'] != 'completed':
-        return jsonify({
-            'error': 'Simulation not completed',
-            'status': simulation['status']
-        }), 400
-    
-    if not simulation['results'] or 'output_files' not in simulation['results']:
-        return jsonify({
-            'error': 'No output files available'
-        }), 500
-    
-    if format_type not in simulation['results']['output_files']:
-        return jsonify({
-            'error': f'No {format_type} file available'
-        }), 404
-    
-    # Get file path
-    file_path = simulation['results']['output_files'][format_type]
-    
-    # Check if file exists
-    if not os.path.exists(file_path):
-        return jsonify({
-            'error': 'File not found on server'
-        }), 404
-    
-    # Determine content type
-    content_types = {
-        'geojson': 'application/geo+json',
-        'json': 'application/json',
-        'csv': 'text/csv'
-    }
-    
-    # Send file
-    return send_file(
-        file_path,
-        mimetype=content_types.get(format_type, 'application/octet-stream'),
-        as_attachment=True,
-        download_name=os.path.basename(file_path)
-    )
-
-
-@app.route('/health', methods=['GET'])
+@app.route('/api/v1/health', methods=['GET'])
 def health_check():
     """Simple health check endpoint."""
     return jsonify({
         'status': 'ok',
-        'version': '0.1.0',
-        'active_simulations': len([s for s in simulations.values() if s['status'] == 'running']),
+        'version': '1.0.0',
+        'active_simulations': len([s for s in simulations.values() if s['status'] in ['queued', 'running']]),
         'total_simulations': len(simulations)
     })
+
+
+# Error handling
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({
+        'error': 'Bad request',
+        'message': str(error)
+    }), 400
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'error': 'Not found',
+        'message': 'The requested resource was not found'
+    }), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return jsonify({
+        'error': 'Internal server error',
+        'message': str(error)
+    }), 500
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Pass through HTTP errors
+    if isinstance(e, HTTPException):
+        return e
+    
+    # Log the error
+    logger.error(f"Unhandled exception: {e}")
+    
+    # Return a generic error response
+    return jsonify({
+        'error': 'Internal server error',
+        'message': 'An unexpected error occurred'
+    }), 500
 
 
 def run_server(host=None, port=None, debug=None):
@@ -298,7 +268,7 @@ def run_server(host=None, port=None, debug=None):
         debug = config.FLASK_CONFIG['debug']
     
     # Run the Flask app
-    app.run(host=host, port=port, debug=debug)
+    app.run(host=host, port=port, debug=debug, threaded=config.FLASK_CONFIG.get('threaded', True))
 
 
 if __name__ == '__main__':

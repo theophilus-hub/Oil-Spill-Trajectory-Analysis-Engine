@@ -1,0 +1,663 @@
+﻿{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Set up project structure and environment",
+      "description": "Create the initial project structure with all required modules and set up the Python environment with necessary dependencies.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "details": "Create the trajectory_core package with empty module files: fetch_data.py, preprocess.py, model.py, export.py, main.py, and server.py. Set up requirements.txt with essential dependencies: NumPy, SciPy, Rasterio, xarray, shapely, richdem, Flask, and requests. Create a basic README.md with project overview and setup instructions. Implement a setup.py file for package installation. Ensure Python 3.8+ compatibility.",
+      "testStrategy": "Verify that the package structure is correct and all dependencies can be installed in a clean environment. Run a basic import test to ensure all modules can be imported without errors.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create basic project directory structure with empty module files",
+          "description": "Set up the initial directory structure for the trajectory_core package and create all the required empty Python module files.",
+          "status": "done",
+          "dependencies": [],
+          "details": "Create a new directory named 'trajectory_core'. Inside this directory, create the following empty Python files with appropriate docstrings: fetch_data.py, preprocess.py, model.py, export.py, main.py, and server.py. Each file should include a basic module docstring explaining its purpose. Also create an empty __init__.py file to make the directory a proper Python package. The directory structure should look like:\n\ntrajectory_core/\nâ”œâ”€â”€ __init__.py\nâ”œâ”€â”€ fetch_data.py\nâ”œâ”€â”€ preprocess.py\nâ”œâ”€â”€ model.py\nâ”œâ”€â”€ export.py\nâ”œâ”€â”€ main.py\nâ””â”€â”€ server.py"
+        },
+        {
+          "id": 2,
+          "title": "Create setup.py and requirements.txt files",
+          "description": "Implement the package installation configuration and dependency specification files.",
+          "status": "done",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a setup.py file in the root directory with proper package metadata, including name, version, description, author, and dependencies. The setup.py should use setuptools and specify Python 3.8+ as the required Python version. Then create a requirements.txt file listing all required dependencies: NumPy, SciPy, Rasterio, xarray, shapely, richdem, Flask, and requests. Include specific version constraints where appropriate (e.g., 'numpy>=1.20.0'). Make sure both files are properly formatted and contain all necessary information for package installation."
+        },
+        {
+          "id": 3,
+          "title": "Write comprehensive README.md with project documentation",
+          "description": "Create a detailed README file with project overview, setup instructions, and usage guidelines.",
+          "status": "done",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Create a README.md file in the root directory with the following sections: 1) Project Title and Brief Description, 2) Installation Instructions (including pip install and development setup), 3) Usage Examples (basic examples of how to use the package), 4) Module Overview (brief description of each module's purpose), 5) Dependencies (list of main dependencies), and 6) Compatibility Information (Python version requirements). Format the README using proper Markdown syntax with headings, code blocks, and lists for readability."
+        },
+        {
+          "id": 4,
+          "title": "Set up virtual environment and verify package installation",
+          "description": "Create a Python virtual environment, install the package in development mode, and verify that the setup works correctly.",
+          "status": "done",
+          "dependencies": [
+            2
+          ],
+          "details": "Create a Python virtual environment using venv or conda with Python 3.8+. Activate the environment and install the package in development mode using 'pip install -e .' from the project root. Then install all dependencies from requirements.txt using 'pip install -r requirements.txt'. Verify the installation by writing a simple test script that imports each module from the package. Document any issues encountered and their solutions. Create a .gitignore file to exclude the virtual environment directory and other unnecessary files (like __pycache__, .pyc files, etc.) from version control."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Implement data models and interfaces",
+      "description": "Define the core data models for spill configuration, environmental data, particle model, and simulation results.",
+      "status": "done",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "details": "Create Python classes or dataclasses for: SpillConfig (location, volume, oil type, duration, timestep), EnvironmentalData (wind vectors, ocean currents, elevation data, oil properties), Particle (position, velocity, mass, decay factors), and SimulationResults (particle positions, concentration maps, affected areas, statistics). Implement proper validation for input parameters. Define clear interfaces between modules with type hints. Create utility functions for data conversion and validation.",
+      "testStrategy": "Write unit tests for each data model to verify proper initialization, validation, and serialization/deserialization. Test edge cases like invalid inputs and boundary conditions.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement SpillConfig data model",
+          "description": "Create the SpillConfig class to store and validate spill configuration parameters",
+          "status": "done",
+          "dependencies": [],
+          "details": "Create a Python dataclass or Pydantic model for SpillConfig with the following attributes: location (lat/long coordinates), volume (in cubic meters), oil_type (string identifier), duration (in hours), and timestep (in seconds). Implement validation logic to ensure: coordinates are within valid ranges, volume is positive, oil_type exists in a predefined list, duration is positive, and timestep is appropriate for simulation needs. Add appropriate type hints and docstrings. Include methods for serialization/deserialization to JSON."
+        },
+        {
+          "id": 2,
+          "title": "Implement EnvironmentalData data model",
+          "description": "Create the EnvironmentalData class to store and validate environmental parameters",
+          "status": "done",
+          "dependencies": [],
+          "details": "Create a Python dataclass or Pydantic model for EnvironmentalData with attributes: wind_vectors (2D or 3D array of vectors), ocean_currents (3D array of vectors), elevation_data (2D array of heights), and oil_properties (dictionary of physical properties). Implement validation to ensure data dimensions are consistent with the simulation domain. Add methods to interpolate environmental data at specific coordinates and times. Include utility functions to load data from common formats (NetCDF, GeoTIFF). Add appropriate type hints and docstrings."
+        },
+        {
+          "id": 3,
+          "title": "Implement Particle data model",
+          "description": "Create the Particle class to represent individual oil particles in the simulation",
+          "status": "done",
+          "dependencies": [],
+          "details": "Create a Python dataclass or Pydantic model for Particle with attributes: position (3D coordinates), velocity (3D vector), mass (float), age (float), and decay_factors (dictionary of weathering parameters). Implement methods to update particle position based on velocity and timestep. Add methods to calculate mass loss due to weathering processes. Include validation to ensure physical constraints are maintained (e.g., mass cannot be negative). Add appropriate type hints and docstrings."
+        },
+        {
+          "id": 4,
+          "title": "Implement SimulationResults data model",
+          "description": "Create the SimulationResults class to store and analyze simulation outputs",
+          "status": "done",
+          "dependencies": [
+            3
+          ],
+          "details": "Create a Python dataclass or Pydantic model for SimulationResults with attributes: particle_positions (list of Particle objects or their positions over time), concentration_maps (3D array representing oil concentration), affected_areas (GeoJSON or similar format), and statistics (dictionary of summary metrics). Implement methods to calculate derived metrics like total oil volume, maximum concentration, and area affected. Add visualization helper methods to generate plots and maps. Include export functions for common formats (CSV, GeoJSON, NetCDF). Add appropriate type hints and docstrings."
+        },
+        {
+          "id": 5,
+          "title": "Define module interfaces and implement utility functions",
+          "description": "Create clear interfaces between modules and implement shared utility functions",
+          "status": "done",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Define Protocol classes (from typing module) to specify interfaces between simulation components. Create utility functions for common operations: coordinate transformations (lat/long to model coordinates), unit conversions, data validation, and error handling. Implement functions to convert between different data representations. Create a validation module with reusable validation functions. Document the interfaces with examples showing how the different models interact. Ensure consistent error handling across all models. Add comprehensive type hints to facilitate static type checking."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Develop basic data acquisition module",
+      "description": "Implement the fetch_data.py module with functionality to retrieve environmental data from at least one source per data type.",
+      "status": "done",
+      "dependencies": [
+        2
+      ],
+      "priority": "high",
+      "details": "Implement API clients for: OpenWeatherMap (wind/weather data), NOAA data services (basic ocean data), USGS (elevation data), and NOAA ADIOS (oil properties). Create a unified interface for data retrieval with appropriate error handling and retry logic. Implement caching for downloaded data to avoid redundant API calls. Include fallback to static test data when API access fails. Focus on retrieving the minimum viable dataset needed for the simulation.",
+      "testStrategy": "Test API connections with mock responses. Verify data retrieval for each source with sample coordinates. Test caching mechanism and fallback to static data. Validate the structure and completeness of retrieved data.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create base API client structure and interfaces",
+          "description": "Design and implement the core structure for API clients with a unified interface that all specific data source clients will inherit from",
+          "status": "done",
+          "dependencies": [],
+          "details": "Create a base ApiClient class in fetch_data.py that defines common methods and properties. Implement a consistent interface with methods like get_data(), validate_response(), and handle_errors(). Define data models/schemas for each data type (weather, ocean, elevation, oil properties). Include configuration management for API keys and endpoints. This foundation will ensure all specific API clients follow the same patterns."
+        },
+        {
+          "id": 2,
+          "title": "Implement caching and fallback mechanisms",
+          "description": "Create a caching system for API responses and fallback mechanism to static test data",
+          "status": "done",
+          "dependencies": [
+            1
+          ],
+          "details": "Implement a caching decorator or utility that stores API responses with configurable TTL. Create a data directory structure for cached responses. Implement a mechanism to detect API failures and automatically fall back to static test data. Create sample static datasets for each data type (weather, ocean, elevation, oil properties) to use as fallbacks. Include functions to validate cache freshness and manage cache size."
+        },
+        {
+          "id": 3,
+          "title": "Implement OpenWeatherMap client for weather/wind data",
+          "description": "Create a specific API client for OpenWeatherMap to retrieve weather and wind data",
+          "status": "done",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement OpenWeatherMapClient class that inherits from the base ApiClient. Add methods to fetch current weather, wind speed/direction, and forecasts. Include parameter validation and response parsing to extract relevant data points. Implement specific error handling for OpenWeatherMap API errors. Ensure the client uses the caching system and can fall back to static data when needed. Document the specific data fields retrieved and their units."
+        },
+        {
+          "id": 4,
+          "title": "Implement NOAA data services client for ocean data",
+          "description": "Create a specific API client for NOAA data services to retrieve basic ocean data",
+          "status": "done",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement NoaaOceanClient class that inherits from the base ApiClient. Add methods to fetch ocean temperature, currents, and other relevant parameters. Include parameter validation and response parsing to extract relevant data points. Implement specific error handling for NOAA API errors. Ensure the client uses the caching system and can fall back to static data when needed. Document the specific data fields retrieved and their units."
+        },
+        {
+          "id": 5,
+          "title": "Implement USGS client for elevation data",
+          "description": "Create a specific API client for USGS to retrieve elevation data",
+          "status": "done",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement UsgsElevationClient class that inherits from the base ApiClient. Add methods to fetch elevation data for specific coordinates or regions. Include parameter validation and response parsing to extract relevant data points. Implement specific error handling for USGS API errors. Ensure the client uses the caching system and can fall back to static data when needed. Document the specific data fields retrieved and their units."
+        },
+        {
+          "id": 6,
+          "title": "Implement NOAA ADIOS client for oil properties",
+          "description": "Create a specific API client for NOAA ADIOS to retrieve oil properties data",
+          "status": "done",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement NoaaAdiosClient class that inherits from the base ApiClient. Add methods to fetch oil properties like viscosity, density, and evaporation rates. Include parameter validation and response parsing to extract relevant data points. Implement specific error handling for ADIOS API errors. Ensure the client uses the caching system and can fall back to static data when needed. Document the specific data fields retrieved and their units. Add a unified method to retrieve a complete set of oil properties needed for the simulation."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Implement basic preprocessing pipeline",
+      "description": "Develop the preprocess.py module to prepare and normalize environmental data for simulation.",
+      "status": "done",
+      "dependencies": [
+        3
+      ],
+      "priority": "high",
+      "details": "Implement DEM resampling to target resolution. Create functions for slope calculation from elevation data. Develop interpolation methods for wind and current data to match simulation resolution. Implement particle initialization for Lagrangian modeling based on spill parameters. Create normalization functions to prepare all data for the modeling engine. Ensure all preprocessing steps are configurable and well-documented.",
+      "testStrategy": "Test preprocessing functions with sample environmental data. Verify correct resampling of DEM data. Validate slope calculations against known values. Test interpolation accuracy with synthetic data. Ensure particle initialization produces expected distribution.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement DEM resampling and slope calculation functions",
+          "description": "Create functions to resample Digital Elevation Model (DEM) data to target resolution and calculate slope from elevation data",
+          "status": "done",
+          "dependencies": [],
+          "details": "Develop two core functions in preprocess.py: (1) resample_dem(dem_data, target_resolution) that uses interpolation techniques to adjust DEM resolution while preserving key terrain features, and (2) calculate_slope(elevation_data) that computes terrain slope using elevation gradients. Include configuration parameters for resampling method (e.g., bilinear, cubic) and slope calculation algorithm. Add appropriate input validation and error handling for both functions."
+        },
+        {
+          "id": 2,
+          "title": "Implement interpolation methods for environmental data",
+          "description": "Create functions to interpolate wind and current data to match simulation resolution",
+          "status": "done",
+          "dependencies": [
+            1
+          ],
+          "details": "Develop interpolate_environmental_data(data, source_resolution, target_resolution, method='bilinear') function that handles different types of vector field data (wind, currents). Implement multiple interpolation methods (bilinear, nearest neighbor, cubic) that preserve vector field properties. Ensure the function handles both regular and irregular grid inputs, and includes proper validation for coordinate systems. Add configuration options for interpolation parameters and boundary handling."
+        },
+        {
+          "id": 3,
+          "title": "Create data normalization functions",
+          "description": "Implement functions to normalize and standardize all environmental data for the modeling engine",
+          "status": "done",
+          "dependencies": [
+            2
+          ],
+          "details": "Develop normalize_data(data, normalization_type, params={}) function that supports multiple normalization methods (min-max scaling, z-score normalization, custom ranges). Create specialized normalization functions for different data types (elevation, wind, currents) that account for their specific characteristics and physical constraints. Include configuration options for normalization parameters and implement validation to ensure normalized data remains physically meaningful. Add functions to reverse normalization when needed."
+        },
+        {
+          "id": 4,
+          "title": "Implement particle initialization for Lagrangian modeling",
+          "description": "Create functions to initialize particles based on spill parameters for Lagrangian modeling",
+          "status": "done",
+          "dependencies": [
+            3
+          ],
+          "details": "Develop initialize_particles(spill_params, domain_info, particle_count) function that generates initial particle positions and properties based on spill parameters. Implement different initialization strategies (point source, line source, area source) with configurable distribution patterns. Add functionality to assign particle properties (mass, age, state) based on spill characteristics. Include validation to ensure particles are properly placed within the simulation domain and conform to physical constraints."
+        },
+        {
+          "id": 5,
+          "title": "Create integrated preprocessing pipeline with documentation",
+          "description": "Integrate all preprocessing components into a configurable pipeline with comprehensive documentation",
+          "status": "done",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Develop preprocess_data(config) function that orchestrates the complete preprocessing workflow based on configuration parameters. Implement a configuration schema with sensible defaults for all preprocessing options. Create detailed docstrings for all functions following a consistent format with parameters, returns, examples, and notes sections. Add logging throughout the pipeline to track preprocessing steps and potential issues. Write a comprehensive module-level docstring explaining the preprocessing pipeline's purpose, components, and usage patterns."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Develop water-based Lagrangian particle model",
+      "description": "Implement the core water-based simulation model in model.py for ocean and lake oil spills.",
+      "status": "done",
+      "dependencies": [
+        4
+      ],
+      "priority": "high",
+      "details": "Implement Lagrangian particle tracking algorithm for water surfaces. Create functions to calculate particle movement based on currents and wind. Implement basic diffusion using random walk or similar approach. Add simple evaporation and decay factors based on oil properties. Create a time-stepping simulation engine with configurable parameters. Implement boundary handling for shorelines and map edges. Focus on computational efficiency for large particle counts.",
+      "testStrategy": "Test with simplified scenarios having known analytical solutions. Verify conservation of mass in the system. Test boundary conditions and edge cases. Benchmark performance with varying particle counts. Compare results with simplified test cases from literature.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create Particle class and basic data structures",
+          "description": "Implement the fundamental Particle class and container structures needed for the Lagrangian model",
+          "status": "done",
+          "dependencies": [],
+          "details": "Create a Particle class with properties for position (x,y coordinates), velocity, mass, age, oil type properties (density, viscosity, etc.), and state variables. Implement a ParticleSystem class to manage collections of particles with methods for adding/removing particles and accessing particle data efficiently. Include serialization methods to save/load simulation state. Focus on memory-efficient data structures that can handle 10,000+ particles."
+        },
+        {
+          "id": 2,
+          "title": "Implement advection from currents and wind",
+          "description": "Create functions to calculate particle movement based on water currents and wind forces",
+          "status": "done",
+          "dependencies": [
+            1
+          ],
+          "details": "Implement vector field handling for water currents and wind data. Create functions to interpolate current/wind values at particle positions. Implement the advection equation to update particle positions based on currents with configurable wind factor (typically 1-3% of wind speed affects surface particles). Add methods to handle time-stepping for position updates with options for Euler or Runge-Kutta integration. Include validation to ensure particles move realistically with the flow fields."
+        },
+        {
+          "id": 3,
+          "title": "Implement diffusion and random walk processes",
+          "description": "Add stochastic diffusion to model small-scale turbulent mixing in water",
+          "status": "done",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement random walk algorithms to simulate diffusion processes in water. Use configurable diffusion coefficients based on environmental conditions. Include horizontal and vertical diffusion components with appropriate scaling. Implement methods to calculate the random displacement vector for each time step. Add options for different diffusion models (e.g., constant, turbulence-based). Ensure the implementation is computationally efficient for large particle counts."
+        },
+        {
+          "id": 4,
+          "title": "Add weathering processes (evaporation and decay)",
+          "description": "Implement basic weathering processes that affect oil particles over time",
+          "status": "done",
+          "dependencies": [
+            1
+          ],
+          "details": "Create functions to model evaporation based on oil properties, temperature, and wind speed. Implement first-order decay processes for different oil components. Add mass reduction calculations based on weathering rates. Include temperature-dependent behavior using Arrhenius-type equations. Create a weathering module that can be extended with additional processes later. Ensure these calculations are vectorized for performance with large particle counts."
+        },
+        {
+          "id": 5,
+          "title": "Implement boundary handling for shorelines and map edges",
+          "description": "Create logic to handle particle interactions with boundaries like coastlines and map edges",
+          "status": "done",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement boundary detection for shorelines using map data. Create functions to handle particle-boundary collisions with options for different behaviors (stick, bounce, remove). Add map edge handling to either contain particles or implement periodic/open boundaries. Include optimized spatial indexing for efficient boundary checks. Create a configurable boundary condition system that can be adjusted based on the simulation requirements. Test with complex coastline geometries to ensure robust handling."
+        },
+        {
+          "id": 6,
+          "title": "Create time-stepping simulation engine with parameter configuration",
+          "description": "Develop the main simulation loop that integrates all components with configurable parameters",
+          "status": "done",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "details": "Implement the main simulation engine that coordinates all processes in the correct sequence. Create a configuration system for model parameters (time step, diffusion coefficients, wind factors, etc.). Add adaptive time-stepping capability based on stability criteria. Implement performance optimizations like vectorization and parallel processing for particle updates. Create monitoring functions to track simulation progress and particle statistics. Add proper error handling and validation to ensure simulation stability. Include methods to extract results at specified time intervals for visualization and analysis."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Implement land-based flow model",
+      "description": "Develop the land-based oil spill simulation model using downhill slope or cost-distance approaches.",
+      "status": "pending",
+      "dependencies": [
+        5
+      ],
+      "priority": "medium",
+      "details": "Implement downhill flow algorithm using elevation and slope data. Create cost-distance model for land surface flow. Account for terrain roughness and absorption factors. Implement time-stepping for land-based simulation. Create transition handling between land and water models for coastal spills. Optimize for performance with large raster datasets. Ensure compatibility with the water-based model for unified simulations.",
+      "testStrategy": "Test with synthetic terrain data having known flow patterns. Verify flow accumulation in depressions. Test land-water transitions in coastal scenarios. Benchmark performance with large DEM datasets. Compare results with simplified test cases.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement basic downhill flow algorithm",
+          "description": "Create the core downhill flow algorithm that determines how oil flows across land based on elevation gradients",
+          "status": "pending",
+          "dependencies": [],
+          "details": "Develop a function that takes elevation raster data as input and calculates flow direction and accumulation. Use D8 or D-infinity algorithm to determine the steepest downslope direction from each cell. Implement a priority queue to process cells in order of elevation. The algorithm should output a flow direction grid and a flow accumulation grid. Include parameters for flow rate based on slope steepness."
+        },
+        {
+          "id": 2,
+          "title": "Incorporate terrain factors into flow model",
+          "description": "Enhance the basic flow model by accounting for terrain roughness, soil absorption, and other land surface characteristics",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Extend the downhill flow algorithm to incorporate terrain factors. Create a coefficient matrix based on land cover/soil type data that modifies flow rates. Implement absorption factors that reduce oil volume based on soil permeability. Add roughness coefficients that slow flow based on vegetation and surface texture. Design the system to accept different terrain parameter sets for various environments (forest, urban, desert, etc.)."
+        },
+        {
+          "id": 3,
+          "title": "Develop cost-distance model for flat terrain",
+          "description": "Implement a cost-distance approach for modeling oil spread in flat or near-flat terrain where downhill flow is minimal",
+          "status": "pending",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Create a cost-distance algorithm that models oil spread in areas with minimal slope. Define cost factors based on terrain characteristics and distance from source. Implement a spreading function that distributes oil outward with diminishing intensity. Ensure the algorithm handles depressions and flat areas appropriately. Include parameters to control spread rate and maximum distance. Design the system to seamlessly integrate with the downhill flow model."
+        },
+        {
+          "id": 4,
+          "title": "Implement time-stepping mechanism for land simulation",
+          "description": "Create a time-stepping system that advances the land-based simulation through discrete time intervals",
+          "status": "pending",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Develop a time-stepping mechanism that updates oil positions and concentrations at each step. Implement variable time steps based on flow velocity to maintain stability. Create functions to calculate oil volume at each cell over time. Add evaporation and degradation factors that reduce oil volume based on time exposed. Ensure conservation of mass throughout the simulation. Include mechanisms to track the leading edge of the spill."
+        },
+        {
+          "id": 5,
+          "title": "Create land-water transition handling",
+          "description": "Develop mechanisms to handle transitions between land and water models for coastal or riverine spills",
+          "status": "pending",
+          "dependencies": [
+            4
+          ],
+          "details": "Implement detection of land-water boundaries using coastline or water body data. Create transition functions that transfer oil from land model to water model and vice versa. Ensure conservation of mass during transitions. Handle special cases like tidal zones with periodic wetting/drying. Develop a unified data structure that can represent both land and water cells. Include parameters to control how oil behaves at the interface (e.g., adherence to shoreline)."
+        },
+        {
+          "id": 6,
+          "title": "Optimize performance for large datasets",
+          "description": "Optimize the land-based flow algorithms for performance with large raster datasets",
+          "status": "pending",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "Implement spatial indexing to efficiently process only active areas of the simulation. Optimize memory usage by using sparse data structures for large, mostly empty grids. Add multi-threading support for parallel processing of independent grid sections. Implement adaptive grid resolution that uses finer resolution only in areas of interest. Create a caching system for frequently accessed terrain data. Add progress reporting and cancelation support for long-running simulations. Perform benchmarking and optimization on large test datasets."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Develop export functionality",
+      "description": "Implement the export.py module to format and output simulation results in multiple formats.",
+      "status": "pending",
+      "dependencies": [
+        5,
+        6
+      ],
+      "priority": "medium",
+      "details": "Implement JSON export for raw structured results as specified in the sample data structure. Create GeoJSON export for mapping visualization with trajectory and concentration data. Develop CSV export for summary statistics and time series data. Ensure all exports include metadata about the simulation parameters. Implement file naming conventions and organization. Create helper functions for common export scenarios.",
+      "testStrategy": "Verify exported files against schema definitions. Test with sample simulation results. Validate GeoJSON with standard tools. Ensure CSV files can be properly imported into analysis tools. Test with large datasets to verify performance.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement core export module structure and JSON export",
+          "description": "Create the basic export.py module structure with configuration handling and implement JSON export functionality for raw structured results",
+          "status": "pending",
+          "dependencies": [],
+          "details": "Create export.py with a modular design that includes: 1) A base Exporter class with common functionality, 2) Configuration handling for export settings, 3) File naming and organization utilities, 4) Implement JSONExporter class that inherits from base class and formats simulation results according to the sample data structure, ensuring all metadata about simulation parameters is included. Include helper functions for common JSON export scenarios."
+        },
+        {
+          "id": 2,
+          "title": "Implement GeoJSON export functionality",
+          "description": "Develop GeoJSON export capability for mapping visualization with trajectory and concentration data",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a GeoJSONExporter class that inherits from the base Exporter class. Implement methods to convert simulation trajectory and concentration data into proper GeoJSON format with appropriate feature collections. Include properties for visualization attributes like concentration levels, timestamps, and other relevant metadata. Ensure the GeoJSON output is compatible with common mapping libraries. Add helper functions for typical GeoJSON export use cases."
+        },
+        {
+          "id": 3,
+          "title": "Implement CSV export functionality",
+          "description": "Develop CSV export for summary statistics and time series data from simulation results",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a CSVExporter class that inherits from the base Exporter class. Implement methods to format and output summary statistics and time series data in CSV format. Include functionality to handle different types of time series data (e.g., concentration over time, distance metrics). Ensure proper column headers and data organization. Add helper functions for common CSV export scenarios like summary reports and detailed time series exports."
+        },
+        {
+          "id": 4,
+          "title": "Implement export management and integration",
+          "description": "Create high-level export management functions and integrate all export types into a unified interface",
+          "status": "pending",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Develop a unified ExportManager class that provides a simple interface to generate all required export formats from a single simulation result. Implement batch export functionality to generate multiple formats simultaneously. Create comprehensive documentation with examples for each export type. Add configuration options for controlling which exports are generated. Implement validation to ensure exports contain required data. Finalize file naming conventions and directory organization for all export types."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Implement main orchestration module",
+      "description": "Develop the main.py module to provide the entry point and orchestration for the simulation process.",
+      "status": "pending",
+      "dependencies": [
+        7
+      ],
+      "priority": "medium",
+      "details": "Create a main simulation runner class that orchestrates the entire process. Implement command-line interface with argument parsing. Create progress reporting for long-running simulations. Implement error handling and logging throughout the process. Add configuration file support for default parameters. Create helper functions for common simulation scenarios. Ensure proper cleanup of temporary files and resources.",
+      "testStrategy": "Test end-to-end simulation with sample inputs. Verify command-line interface with various parameter combinations. Test error handling with invalid inputs. Measure resource usage during simulation. Verify logging output and progress reporting.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create SimulationRunner class structure",
+          "description": "Implement the core SimulationRunner class that will orchestrate the entire simulation process",
+          "status": "pending",
+          "dependencies": [],
+          "details": "Create a main.py module with a SimulationRunner class that will serve as the central orchestrator. Define the class structure with initialization method that accepts simulation parameters. Implement placeholder methods for the main simulation stages (setup, run, analyze, cleanup). Include docstrings and type hints. This class will be the foundation for the remaining implementation."
+        },
+        {
+          "id": 2,
+          "title": "Implement command-line interface and configuration",
+          "description": "Add argument parsing for command-line usage and configuration file support",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Use argparse to create a robust CLI with appropriate arguments for all simulation parameters. Implement configuration file loading (using configparser or similar) to read default parameters from a config file. Create a mechanism to merge command-line arguments with configuration file values, with command-line taking precedence. Add validation for required parameters and appropriate help text. Include a sample configuration file template."
+        },
+        {
+          "id": 3,
+          "title": "Implement core simulation workflow",
+          "description": "Complete the SimulationRunner methods to execute the full simulation process",
+          "status": "pending",
+          "dependencies": [
+            2
+          ],
+          "details": "Flesh out the SimulationRunner methods to properly sequence all simulation steps. Implement the main run() method that orchestrates the entire process from setup to cleanup. Create helper functions for common simulation scenarios (e.g., standard configurations, batch processing). Ensure proper initialization of all required components and passing of parameters between stages. Add appropriate return values and state tracking."
+        },
+        {
+          "id": 4,
+          "title": "Add progress reporting and logging",
+          "description": "Implement comprehensive logging and progress reporting for simulations",
+          "status": "pending",
+          "dependencies": [
+            3
+          ],
+          "details": "Set up a logging system using the standard logging module with appropriate log levels. Implement progress reporting for long-running simulations using tqdm or a similar library. Add timing information for performance analysis. Create different verbosity levels that can be set via command-line. Ensure all significant events and potential issues are properly logged. Add visual feedback for interactive usage."
+        },
+        {
+          "id": 5,
+          "title": "Implement error handling and resource management",
+          "description": "Add robust error handling and ensure proper resource cleanup",
+          "status": "pending",
+          "dependencies": [
+            4
+          ],
+          "details": "Implement comprehensive error handling with appropriate exception classes. Add try/except blocks around critical operations with meaningful error messages. Ensure proper cleanup of temporary files and resources using context managers or finally blocks. Implement graceful termination on keyboard interrupt. Add signal handling for proper shutdown. Create a mechanism to save partial results in case of failure. Test error scenarios to ensure the system fails gracefully and provides useful diagnostic information."
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Develop Flask API server",
+      "description": "Implement the optional server.py module to provide REST API access to the simulation functionality.",
+      "status": "pending",
+      "dependencies": [
+        8
+      ],
+      "priority": "low",
+      "details": "Create Flask application with proper structure. Implement POST /simulate endpoint to trigger analysis with JSON payload. Develop GET /status/:id endpoint to check simulation progress. Create endpoints to serve output files as downloads or inline JSON. Implement basic request validation and error handling. Add simple authentication placeholder for future implementation. Create Swagger/OpenAPI documentation for the API.",
+      "testStrategy": "Test API endpoints with Postman or similar tool. Verify correct handling of various input scenarios. Test concurrent requests and performance under load. Validate response formats against specifications. Test error responses and edge cases.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up Flask application structure",
+          "description": "Create the basic Flask application structure with proper organization of routes, models, and utilities.",
+          "status": "pending",
+          "dependencies": [],
+          "details": "Initialize a Flask application in server.py. Create a modular structure with folders for routes, models, and utilities. Set up configuration handling for different environments (development, production). Implement a basic application factory pattern to allow for testing. Add logging configuration. Create placeholder files for the routes that will be implemented in subsequent tasks."
+        },
+        {
+          "id": 2,
+          "title": "Implement POST /simulate endpoint",
+          "description": "Create the endpoint that accepts simulation parameters and triggers the simulation process.",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Implement a POST endpoint at /simulate that accepts JSON payload with simulation parameters. Validate the incoming request data using a schema validator (e.g., marshmallow or Flask-WTF). Generate a unique ID for the simulation job. Store the simulation parameters and status in a simple in-memory data structure (can be replaced with a database later). Trigger the simulation asynchronously using a background thread or task queue. Return a response with the simulation ID and initial status."
+        },
+        {
+          "id": 3,
+          "title": "Implement GET /status/:id endpoint",
+          "description": "Create the endpoint to check the status and progress of a simulation job.",
+          "status": "pending",
+          "dependencies": [
+            2
+          ],
+          "details": "Implement a GET endpoint at /status/:id that retrieves the current status of a simulation job. Return appropriate HTTP status codes (200 for found, 404 for not found). Include details such as progress percentage, current stage, and estimated time remaining if available. Add error handling for invalid IDs or completed simulations with errors. Ensure the endpoint is efficient and doesn't block other requests."
+        },
+        {
+          "id": 4,
+          "title": "Create endpoints for simulation results",
+          "description": "Implement endpoints to serve simulation output files as downloads or inline JSON responses.",
+          "status": "pending",
+          "dependencies": [
+            3
+          ],
+          "details": "Create a GET endpoint at /results/:id that returns the complete simulation results as JSON. Implement a GET endpoint at /download/:id/:filename for downloading specific output files. Add content-type headers appropriate for each file type. Implement caching headers to improve performance for large files. Add error handling for missing files or incomplete simulations. Ensure large files are streamed rather than loaded entirely into memory."
+        },
+        {
+          "id": 5,
+          "title": "Add authentication and API documentation",
+          "description": "Implement basic authentication and create Swagger/OpenAPI documentation for the API.",
+          "status": "pending",
+          "dependencies": [
+            4
+          ],
+          "details": "Add a simple API key authentication mechanism as a placeholder. Implement middleware to validate API keys on protected routes. Create comprehensive Swagger/OpenAPI documentation using Flask-RESTX or flasgger. Document all endpoints, request parameters, response formats, and error codes. Include example requests and responses. Add a simple web interface to browse the API documentation. Implement proper error handling with standardized error response format across all endpoints."
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Create integration examples and documentation",
+      "description": "Develop integration examples with the Rust/TypeScript frontend and comprehensive documentation.",
+      "status": "pending",
+      "dependencies": [
+        9
+      ],
+      "priority": "low",
+      "details": "Create example code for integrating with Rust/TypeScript frontend. Develop comprehensive API documentation with function signatures and usage examples. Write user guide with common scenarios and best practices. Create Jupyter notebooks demonstrating key features and workflows. Document performance considerations and optimization strategies. Include troubleshooting guide and FAQ. Prepare sample datasets for testing and demonstration.",
+      "testStrategy": "Review documentation for completeness and accuracy. Test integration examples in isolation. Gather feedback from potential users on documentation clarity. Verify that all features are properly documented. Ensure examples run successfully in a clean environment.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Develop API reference documentation",
+          "description": "Create comprehensive API documentation with function signatures, parameter descriptions, return types, and error handling",
+          "status": "pending",
+          "dependencies": [],
+          "details": "Document all public API functions, methods, and types with accurate signatures. Include parameter descriptions, return types, and possible errors. Organize by modules/components. Use standard documentation formats (e.g., rustdoc for Rust, JSDoc for TypeScript). Ensure code examples for each API function showing basic usage patterns. Include version compatibility information and deprecation notices where applicable."
+        },
+        {
+          "id": 2,
+          "title": "Create basic integration examples for Rust and TypeScript",
+          "description": "Develop standalone example code demonstrating core integration patterns with both Rust and TypeScript frontends",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "details": "Create at least 3 example projects for each language (Rust/TypeScript): 1) A minimal integration showing basic setup and initialization, 2) A data processing example showing typical workflows, and 3) An advanced example demonstrating error handling and optimization. Each example should be fully functional, well-commented, and follow best practices. Include README files explaining the purpose and setup instructions for each example. Structure code to highlight the integration points clearly."
+        },
+        {
+          "id": 3,
+          "title": "Develop interactive Jupyter notebooks for feature demonstrations",
+          "description": "Create Jupyter notebooks that demonstrate key features and workflows in an interactive format",
+          "status": "pending",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Develop 4-6 Jupyter notebooks covering: system overview, data processing workflows, performance optimization, and advanced use cases. Each notebook should combine explanatory text, code examples, and visualizations where appropriate. Include sample data and expected outputs. Ensure notebooks are self-contained and can be run independently. Test notebooks in common environments to ensure compatibility. Add clear instructions for setup and execution."
+        },
+        {
+          "id": 4,
+          "title": "Write comprehensive user guide with common scenarios",
+          "description": "Create a user guide covering installation, configuration, common usage scenarios, best practices, and troubleshooting",
+          "status": "pending",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Develop a structured user guide with sections for: installation instructions for different environments, configuration options and their impacts, step-by-step tutorials for common scenarios, best practices for performance and reliability, troubleshooting guide addressing common issues, and an FAQ section. Include diagrams where helpful for understanding concepts or workflows. Format as markdown for easy maintenance and conversion to other formats. Ensure consistency with API documentation and examples."
+        },
+        {
+          "id": 5,
+          "title": "Prepare sample datasets and performance optimization guide",
+          "description": "Create sample datasets for testing and demonstration, along with documentation on performance considerations and optimization strategies",
+          "status": "pending",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Develop 3-5 representative sample datasets of varying sizes and complexity for testing and demonstrations. Document the characteristics of each dataset and appropriate use cases. Create a dedicated performance guide covering: system requirements, scaling considerations, memory optimization techniques, processing optimizations, and benchmarking methodologies. Include concrete examples of before/after optimization with performance metrics. Package datasets in easily accessible formats with clear licensing information."
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "projectName": "Oil Spill Trajectory Analysis Engine",
+    "totalTasks": 10,
+    "sourceFile": "scripts/prd.txt",
+    "generatedAt": "2023-11-14"
+  }
+}

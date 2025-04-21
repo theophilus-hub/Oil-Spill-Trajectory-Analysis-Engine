@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "features": [],
+  "properties": {
+    "metadata": {
+      "simulation_start": "",
+      "simulation_end": "",
+      "timestep_minutes": 0,
+      "duration_hours": 0,
+      "particle_count": 0,
+      "oil_type": "unknown",
+      "spill_volume": 0
+    }
+  }
+}

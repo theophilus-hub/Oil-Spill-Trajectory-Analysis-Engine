@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oil Spill Trajectory Analysis - API Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 5px;
+        }
+        .progress {
+            height: 25px;
+        }
+        .simulation-card {
+            transition: all 0.3s ease;
+        }
+        .simulation-card:hover {
+            transform: translateY(-5px);
+        }
+        .result-link {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">Oil Spill Trajectory Analysis API Demo</h1>
+        
+        <div class="row">
+            <!-- Simulation Form -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Start New Simulation</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="simulationForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="latitude" class="form-label">Latitude</label>
+                                    <input type="number" class="form-control" id="latitude" step="0.0001" value="-3.57" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="longitude" class="form-label">Longitude</label>
+                                    <input type="number" class="form-control" id="longitude" step="0.0001" value="-80.45" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="volume" class="form-label">Spill Volume (cubic meters)</label>
+                                <input type="number" class="form-control" id="volume" min="1" value="5000" required>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="oilType" class="form-label">Oil Type</label>
+                                    <select class="form-select" id="oilType" required>
+                                        <option value="light_crude">Light Crude</option>
+                                        <option value="medium_crude" selected>Medium Crude</option>
+                                        <option value="heavy_crude">Heavy Crude</option>
+                                        <option value="bunker_fuel">Bunker Fuel</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="modelType" class="form-label">Model Type</label>
+                                    <select class="form-select" id="modelType">
+                                        <option value="simple">Simple</option>
+                                        <option value="hybrid" selected>Hybrid</option>
+                                        <option value="advanced">Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="durationHours" class="form-label">Duration (hours)</label>
+                                    <input type="number" class="form-control" id="durationHours" min="1" value="24">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="timestepMinutes" class="form-label">Timestep (minutes)</label>
+                                    <input type="number" class="form-control" id="timestepMinutes" min="1" value="60">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="particleCount" class="form-label">Particle Count</label>
+                                    <input type="number" class="form-control" id="particleCount" min="10" value="100">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Output Formats</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="geojson" id="formatGeoJSON" checked>
+                                    <label class="form-check-label" for="formatGeoJSON">GeoJSON</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="json" id="formatJSON" checked>
+                                    <label class="form-check-label" for="formatJSON">JSON</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="csv" id="formatCSV" checked>
+                                    <label class="form-check-label" for="formatCSV">CSV</label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Start Simulation</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map and Results -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Map View</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="map"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Simulations</h5>
+                        <button id="refreshButton" class="btn btn-sm btn-light">Refresh</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="simulationsList" class="list-group">
+                            <div class="text-center text-muted py-3">No simulations yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Simulation Details Modal -->
+        <div class="modal fade" id="simulationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Simulation Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="simulationDetails">
+                        <!-- Simulation details will be inserted here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css" rel="stylesheet">
+    <script src="script.js"></script>
+</body>
+</html>
